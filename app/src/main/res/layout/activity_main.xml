@@ -11,30 +11,37 @@
         android:id="@+id/steps_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="0"
         android:textColor="@color/black"
-        android:textSize="40dp"
+        android:textSize="130sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="1000 шагов" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="40dp"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toBottomOf="@+id/steps_text_view"
-        app:layout_constraintEnd_toEndOf="@+id/progress_bar"
+        android:paddingBottom="70dp"
+        android:text="из 300"
+        android:textColor="@color/red"
+        android:textSize="60sp"
+        app:layout_constraintBottom_toBottomOf="@+id/progress_bar"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/steps_text_view"
-        tools:text="/3000" />
+        app:layout_constraintTop_toBottomOf="@+id/steps_text_view" />
 
-    <ProgressBar
+    <com.mikhaellopez.circularprogressbar.CircularProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="400dp"
         android:layout_height="4000dp"
         android:max="3000"
+        app:cpb_background_progressbar_color="@color/blue"
+        app:cpb_background_progressbar_width="40dp"
+        app:cpb_progress_direction="to_right"
+        app:cpb_progress_max="300"
+        app:cpb_progressbar_color="@color/cyan"
+        app:cpb_progressbar_width="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
