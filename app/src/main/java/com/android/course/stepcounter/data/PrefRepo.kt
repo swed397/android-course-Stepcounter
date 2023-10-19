@@ -1,7 +1,6 @@
 package com.android.course.stepcounter.data
 
 import android.content.Context
-import javax.inject.Inject
 
 class PrefRepo constructor(context: Context) {
 

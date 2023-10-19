@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.course.stepcounter.R
 import com.android.course.stepcounter.data.PrefRepo
 import com.android.course.stepcounter.databinding.ActivityMainBinding
+import com.android.course.stepcounter.di.App
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -24,13 +25,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sensorManager: SensorManager
     private var oldValue = 0
 
-//    @Inject
-//    private lateinit var prefRepo: PrefRepo
+    @Inject
+    private lateinit var prefRepo: PrefRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
+
+        (application as App).appComponent.inject(this)
+
         setContentView(view)
 
         checkPermission()
@@ -81,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun init() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        binding.stepsTextView.text = prefRepo.get().toString()
+//        binding.stepsTextView.text = prefRepo.get().toString()
     }
 
     private fun checkPermission() {

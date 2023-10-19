@@ -1,7 +1,7 @@
 package com.android.course.stepcounter.di
 
 import android.content.Context
-import android.content.SharedPreferences
+import com.android.course.stepcounter.data.PrefRepo
 import dagger.Module
 import dagger.Provides
 
@@ -9,6 +9,5 @@ import dagger.Provides
 class RepoModule(private val context: Context) {
 
     @Provides
-    fun provideSharedPref(): SharedPreferences =
-        context.getSharedPreferences("StepCounterPref", Context.MODE_PRIVATE)
+    fun providePrefRepo(): PrefRepo = PrefRepo(context)
 }
