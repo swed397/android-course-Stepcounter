@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">android-cource-Stepcounter</string>
     <string name="max_steps">3000</string>
+    <integer name="accuracy">2</integer>
 </resources>

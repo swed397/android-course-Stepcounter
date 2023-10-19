@@ -1,4 +1,4 @@
-package com.android.course.stepcounter
+package com.android.course.stepcounter.present
 
 import android.Manifest
 import android.content.Context
@@ -10,7 +10,10 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.course.stepcounter.R
+import com.android.course.stepcounter.data.PrefRepo
 import com.android.course.stepcounter.databinding.ActivityMainBinding
+import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -20,6 +23,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var sensorManager: SensorManager
     private var oldValue = 0
+
+//    @Inject
+//    private lateinit var prefRepo: PrefRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +50,10 @@ class MainActivity : AppCompatActivity() {
                             val z = event.values[2]
 
                             val magnitude = sqrt(x * x + y * y + z * z)
-                            if (abs(oldValue) - abs(magnitude) >= ACCURACY) {
+                            if (abs(oldValue) - abs(magnitude) >= applicationContext.resources.getInteger(
+                                    R.integer.accuracy
+                                )
+                            ) {
                                 val newValue = getCurrentSteps() + 1
                                 binding.stepsTextView.text = newValue.toString()
                                 binding.progressBar.progress = newValue.toFloat()
@@ -66,16 +75,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        saveSteps()
+//        prefRepo.save(getCurrentSteps())
         super.onStop()
     }
 
     private fun init() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-        val sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
-        val stepsFromPref = sharedPreferences.getInt(STEPS_COUNTER_KEY_NAME, -1)
-        binding.stepsTextView.text = stepsFromPref.toString()
+        binding.stepsTextView.text = prefRepo.get().toString()
     }
 
     private fun checkPermission() {
@@ -90,18 +96,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveSteps() {
-        val sharedPreferences = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putInt(STEPS_COUNTER_KEY_NAME, getCurrentSteps())
-        editor.apply()
-    }
-
     private fun getCurrentSteps(): Int = Integer.parseInt(binding.stepsTextView.text.toString())
-
-    private companion object {
-        const val ACCURACY = 2
-        const val SHARED_PREF_NAME = "StepCounterPref"
-        const val STEPS_COUNTER_KEY_NAME = "StepCounter"
-    }
 }
