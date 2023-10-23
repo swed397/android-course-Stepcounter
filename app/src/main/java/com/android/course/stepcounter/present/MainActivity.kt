@@ -9,31 +9,34 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.android.course.stepcounter.R
-import com.android.course.stepcounter.data.PrefRepo
 import com.android.course.stepcounter.databinding.ActivityMainBinding
 import com.android.course.stepcounter.di.App
+import com.android.course.stepcounter.domain.StepCounterPrefRepo
 import javax.inject.Inject
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
     private lateinit var sensorManager: SensorManager
-    private var oldValue = 0
+    private val mainActivityViewModel: MainActivityViewModel by viewModels { viewModelFactory }
 
     @Inject
-    private lateinit var prefRepo: PrefRepo
+    lateinit var stepCounterPrefRepo: StepCounterPrefRepo
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (application as App).appComponent.inject(this)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
 
-        (application as App).appComponent.inject(this)
 
         setContentView(view)
 
@@ -48,21 +51,11 @@ class MainActivity : AppCompatActivity() {
             sensorManager.registerListener(
                 object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent?) {
-                        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-                            val x = event.values[0]
-                            val y = event.values[1]
-                            val z = event.values[2]
-
-                            val magnitude = sqrt(x * x + y * y + z * z)
-                            if (abs(oldValue) - abs(magnitude) >= applicationContext.resources.getInteger(
-                                    R.integer.accuracy
-                                )
-                            ) {
-                                val newValue = getCurrentSteps() + 1
-                                binding.stepsTextView.text = newValue.toString()
-                                binding.progressBar.progress = newValue.toFloat()
-                            }
-                            oldValue = magnitude.toInt()
+                        val accuracy = applicationContext.resources.getInteger(R.integer.accuracy)
+                        mainActivityViewModel.detectSteps(getCurrentSteps(), accuracy, event)
+                        { newValue ->
+                            binding.stepsTextView.text = newValue.toString()
+                            binding.progressBar.progress = newValue.toFloat()
                         }
                     }
 
@@ -79,13 +72,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-//        prefRepo.save(getCurrentSteps())
+        mainActivityViewModel.save(getCurrentSteps())
         super.onStop()
     }
 
     private fun init() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//        binding.stepsTextView.text = prefRepo.get().toString()
+        binding.stepsTextView.text = mainActivityViewModel.getSteps().toString()
     }
 
     private fun checkPermission() {

@@ -9,7 +9,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        appComponent =
-            DaggerAppComponent.builder().repoModule(RepoModule(this.applicationContext)).build()
+        appComponent = DaggerAppComponent.builder()
+            .repoModule(RepoModule(this.applicationContext))
+            .build()
     }
 }
