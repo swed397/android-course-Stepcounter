@@ -2,4 +2,7 @@
     <string name="app_name">android-cource-Stepcounter</string>
     <string name="max_steps">3000</string>
     <integer name="accuracy">2</integer>
+    <string name="step_counter_notification_title">Step counter app</string>
+    <string name="step_counter_notification_content">Your steps are counting</string>
+    <string name="stop_service_text">stop</string>
 </resources>
