@@ -12,9 +12,11 @@ import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.android.course.stepcounter.R
 import com.android.course.stepcounter.STEP_ACTION
 import com.android.course.stepcounter.databinding.ActivityMainBinding
 import com.android.course.stepcounter.di.App
+import com.android.course.stepcounter.domain.BroadcastReceiverListener
 import com.android.course.stepcounter.domain.StepCounterPrefRepo
 import javax.inject.Inject
 
@@ -57,6 +59,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun registerReceiver() {
         val intentFilter = IntentFilter(STEP_ACTION)
+        broadcastReceiver.broadcastReceiverListener = object : BroadcastReceiverListener {
+            override fun getValue(stepValue: Float) {
+                mainActivityViewModel.detectSteps(
+                    stepValue.toInt(), resources.getInteger(R.integer.accuracy)
+                )
+            }
+
+        }
         registerReceiver(broadcastReceiver, intentFilter)
     }
 
