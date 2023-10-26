@@ -26,10 +26,13 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var stepCounterPrefRepo: StepCounterPrefRepo
+
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+
     @Inject
     lateinit var broadcastReceiver: MainActivityBroadcastReceiver
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,28 +41,23 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
-
         setContentView(view)
 
-        startForegroundService(Intent(this, MainActivityService::class.java))
-
-
         checkPermission()
+
         init()
-
-        val intentFilter = IntentFilter(STEP_ACTION)
-//        val br = MainActivityBroadcastReceiver()
-        registerReceiver(broadcastReceiver, intentFilter)
-    }
-
-    override fun onStop() {
-        mainActivityViewModel.save(getCurrentSteps())
-        super.onStop()
+        startForegroundService(Intent(this, MainActivityService::class.java))
+        registerReceiver()
     }
 
     private fun init() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         binding.stepsTextView.text = mainActivityViewModel.getSteps().toString()
+    }
+
+    private fun registerReceiver() {
+        val intentFilter = IntentFilter(STEP_ACTION)
+        registerReceiver(broadcastReceiver, intentFilter)
     }
 
     private fun checkPermission() {

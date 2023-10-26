@@ -14,9 +14,6 @@ class MainActivityBroadcastReceiver : BroadcastReceiver() {
             Log.d("TEST", "THIS IS HEEEEEE")
             val value = intent.getFloatExtra(PARAM_STEP_EXTRA, 0.0f)
             Log.d("TEST", value.toString())
-
-
         }
-        Log.d("TEST", " RECEIVER RECEIVE!!!!")
     }
 }
