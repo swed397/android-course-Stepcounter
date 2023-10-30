@@ -14,14 +14,12 @@ class MainActivityViewModel @Inject constructor(private val repo: StepCounterPre
 
     fun getSteps(): Int = repo.get()
 
-    fun detectSteps(
-        currentSteps: Int,
-        accuracy: Int,
-    ) {
-        //ToDo refactor
-        if (abs(oldValue - currentSteps) >= accuracy) {
-//            onBind.invoke(currentSteps + 1)
+    fun detectSteps(currentStepsValue: Float, accuracy: Int): Boolean {
+        var isStep = false
+        if (abs(oldValue - currentStepsValue) >= accuracy) {
+            isStep = true
         }
-        oldValue = currentSteps
+        oldValue = currentStepsValue.toInt()
+        return isStep
     }
 }

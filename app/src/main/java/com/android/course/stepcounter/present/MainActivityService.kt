@@ -20,6 +20,7 @@ import androidx.core.app.ServiceCompat
 import com.android.course.stepcounter.PARAM_STEP_EXTRA
 import com.android.course.stepcounter.R
 import com.android.course.stepcounter.STEP_ACTION
+import com.android.course.stepcounter.STOP_ACTION
 import kotlin.math.sqrt
 
 
@@ -28,6 +29,7 @@ class MainActivityService : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.flags == PendingIntent.FLAG_CANCEL_CURRENT) {
+            sendBroadcast(Intent(STOP_ACTION))
             stopForeground(STOP_FOREGROUND_DETACH)
             stopSelf()
         }

@@ -11,13 +11,19 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.android.course.stepcounter.R
 import com.android.course.stepcounter.STEP_ACTION
+import com.android.course.stepcounter.STOP_ACTION
 import com.android.course.stepcounter.databinding.ActivityMainBinding
 import com.android.course.stepcounter.di.App
-import com.android.course.stepcounter.domain.BroadcastReceiverListener
 import com.android.course.stepcounter.domain.StepCounterPrefRepo
+import com.android.course.stepcounter.domain.UiState
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -58,15 +64,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun registerReceiver() {
-        val intentFilter = IntentFilter(STEP_ACTION)
-        broadcastReceiver.broadcastReceiverListener = object : BroadcastReceiverListener {
-            override fun getValue(stepValue: Float) {
-                mainActivityViewModel.detectSteps(
-                    stepValue.toInt(), resources.getInteger(R.integer.accuracy)
-                )
-            }
-
+        val intentFilter = IntentFilter().apply {
+            addAction(STOP_ACTION)
+            addAction(STEP_ACTION)
         }
+
+        broadcastReceiver.stepValueFlow
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .onEach {
+                val isStep = mainActivityViewModel.detectSteps(
+                    it, resources.getInteger(R.integer.accuracy)
+                )
+                if (isStep) binding.stepsTextView.text = (getCurrentSteps() + 1).toString()
+            }
+            .launchIn(lifecycleScope)
+
+        broadcastReceiver.uiState
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .onEach { if (it is UiState.OnStop) finish() }
+            .launchIn(lifecycleScope)
+
         registerReceiver(broadcastReceiver, intentFilter)
     }
 
@@ -80,6 +97,13 @@ class MainActivity : AppCompatActivity() {
                 1
             );
         }
+    }
+
+    override fun onDestroy() {
+        mainActivityViewModel.save(getCurrentSteps())
+        broadcastReceiver.close()
+        unregisterReceiver(broadcastReceiver)
+        super.onDestroy()
     }
 
     private fun getCurrentSteps(): Int = Integer.parseInt(binding.stepsTextView.text.toString())

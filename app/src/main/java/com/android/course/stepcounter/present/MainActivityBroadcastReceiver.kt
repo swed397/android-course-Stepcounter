@@ -3,22 +3,48 @@ package com.android.course.stepcounter.present
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.android.course.stepcounter.PARAM_STEP_EXTRA
 import com.android.course.stepcounter.STEP_ACTION
-import com.android.course.stepcounter.domain.BroadcastReceiverListener
+import com.android.course.stepcounter.STOP_ACTION
+import com.android.course.stepcounter.domain.UiState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import java.io.Closeable
 
-class MainActivityBroadcastReceiver : BroadcastReceiver() {
+class MainActivityBroadcastReceiver : BroadcastReceiver(), Closeable {
 
-    var broadcastReceiverListener: BroadcastReceiverListener? = null
+    private val _stepValueFlow = MutableSharedFlow<Float>(
+        replay = 0,
+        extraBufferCapacity = 10,
+        onBufferOverflow = BufferOverflow.SUSPEND
+    )
+    val stepValueFlow: Flow<Float>
+        get() = _stepValueFlow
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob())
+
+    private val _uiState = MutableStateFlow<UiState>(UiState.OnWork)
+    val uiState: StateFlow<UiState>
+        get() = _uiState
+
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == STEP_ACTION) {
-            Log.d("TEST", "THIS IS HEEEEEE")
             val value = intent.getFloatExtra(PARAM_STEP_EXTRA, 0.0f)
-            Log.d("TEST", value.toString())
-
-            broadcastReceiverListener?.getValue(value)
+            scope.launch { _stepValueFlow.emit(value) }
         }
+        if (intent?.action == STOP_ACTION) {
+            scope.launch { _uiState.emit(UiState.OnStop) }
+        }
+    }
+
+    override fun close() {
+        scope.cancel()
     }
 }

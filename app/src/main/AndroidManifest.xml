@@ -32,6 +32,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="STEP_ACTION" />
+                <action android:name="STOP_ACTION" />
             </intent-filter>
         </receiver>
     </application>
